@@ -4,14 +4,47 @@ from time import time, sleep
 from tkinter import *
 from collections import Counter
 from quantumrandom import get_data
+from os import urandom
+from knut_generator import knut_generator
 
 
-def rand_generator(n, d=1000):
+def os_generator(n, d=1000, mode=1):
     tg = time()
+    if mode:
+        file = open("osgen.txt", 'a')
+        print(' ', file=file)
+    else:
+        with open("osgen.txt", 'r') as file:
+            strfile = file.read().replace("\n", " ")
+            a = list(map(int, strfile.split()))
+            file.close()
+            return a
+    a = [0] * n
+    for i in range(n):
+        a[i] = int(urandom(3).hex(), 16) % (d + 1)
+    print('time: ', round(time() - tg, 3))
+    print(*a, file=file)
+    file.close()
+    return a
+
+
+def rand_generator(n, d=1000, mode=1):
+    tg = time()
+    if mode:
+        file = open("randgen.txt", 'a')
+        print(' ', file=file)
+    else:
+        with open("randgen.txt", 'r') as file:
+            strfile = file.read().replace("\n", " ")
+            a = list(map(int, strfile.split()))
+            file.close()
+            return a
     a = [0] * n
     for i in range(n):
         a[i] = randint(0, d)
     print('time: ', round(time() - tg, 3))
+    print(*a, file=file)
+    file.close()
     return a
 
 
@@ -45,15 +78,24 @@ def hit_or_miss(a, n, d=1000, r=1, l=1):
         return 0
 
 
-def analiz_pi(a, d, metod):
+def analiz_pi(a, d, delta, metod):
     k = 0
-    while k <= len(a) - 20000:
-        yield (k + 20000) // 2, metod(a[k: k + 20001], 20000, d)
-        k += 20000
+    while k <= len(a) - delta:
+        yield metod(a[k: k + delta + 1], delta, d)
+        k += delta
 
 
-def neyman_generator(n, d=1000):
+def neyman_generator(n, d=1000, mode=1):
     tg = time()
+    if mode:
+        file = open("neyman.txt", 'a')
+        print(' ', file=file)
+    else:
+        with open("neyman.txt", 'r') as file:
+            strfile = file.read().replace("\n", " ")
+            a = list(map(int, strfile.split()))
+            file.close()
+            return a
     t = int(time() * 10 ** 6) % 10 ** 6
     a = [0] * n
     for i in range(n):
@@ -64,16 +106,27 @@ def neyman_generator(n, d=1000):
         if t == 0:
             t = int(time() * 10 ** 6) % 10 ** 6
     print('time: ', round(time() - tg, 3))
+    print(*a, file=file)
+    file.close()
     return a
 
 
-def middle_generator(n, d):
+def middle_generator(n, d, mode=1):
     tg = time()
+    if mode:
+        file = open("middle.txt", 'a')
+        print(' ', file=file)
+    else:
+        with open("middle.txt", 'r') as file:
+            strfile = file.read().replace("\n", " ")
+            a = list(map(int, strfile.split()))
+            file.close()
+            return a
     r0 = int(time() * 10 ** 6) % 10 ** 6
     r1 = int(time() * 10 ** 12) % 10 ** 6
     a = [0] * n
     for i in range(n):
-        r = (r1 * r0 // 10 ** 3) % 10 ** 6
+        r = ((r1 * r0) // 10 ** 3) % 10 ** 6
         r0 = r1
         r1 = r
         a[i] = r % (d + 1)
@@ -81,11 +134,22 @@ def middle_generator(n, d):
         if r == 0:
             r1 = int(time() * 10 ** 6) % 10 ** 6
     print('time: ', round(time() - tg, 3))
+    print(*a, file=file)
+    file.close()
     return a
 
 
-def line_generator(n, d=1000):
+def line_generator(n, d=1000, mode=1):
     tg = time()
+    if mode:
+        file = open("line.txt", 'a')
+        print(' ', file=file)
+    else:
+        with open("line.txt", 'r') as file:
+            strfile = file.read().replace("\n", " ")
+            a = list(map(int, strfile.split()))
+            file.close()
+            return a
     x0 = int(time() * 10 ** 12) % 10 ** 12
     a = 1664525
     c = 1013904223
@@ -96,11 +160,22 @@ def line_generator(n, d=1000):
         la[i] = x % (d + 1)
         x0 = x
     print('time: ', round(time() - tg, 3))
+    print(*la, file=file)
+    file.close()
     return la
 
 
-def fib_generator(n, d=1000):
+def fib_generator(n, d=1000, mode=1):
     tg = time()
+    if mode:
+        file = open("fibgen.txt", 'a')
+        print(' ', file=file)
+    else:
+        with open("fibgen.txt", 'r') as file:
+            strfile = file.read().replace("\n", " ")
+            a = list(map(int, strfile.split()))
+            file.close()
+            return a
     m = 2 ** 32
     a = [0] * 55 + [0] * n
     a[0], a[1] = int(tg * 10 ** 6) % 10 ** 6 % m, int(tg * 10 ** 6) % 10 ** 6 % m
@@ -109,6 +184,8 @@ def fib_generator(n, d=1000):
     for i in range(55, n + 55):
         a[i] = (a[i - 55] + a[i - 24]) % m
     print('time: ', round(time() - tg, 3))
+    print(*[a[i] % (d + 1) for i in range(55, n + 55)], file=file)
+    file.close()
     return [a[i] % (d + 1) for i in range(55, n + 55)]
 
 
@@ -117,7 +194,7 @@ def RSLOS(reg, mask, p):
     return ((reg << 1) | b0) % 2 ** p
 
 
-def RSLOS_generator(n, d=1000, mode=0):
+def RSLOS_generator(n, d=1000, mode=1):
     tg = time()
     m = 2 ** 32
     reg = int(time() * 10 ** 10) % 10 ** 10 % 2 ** 32
@@ -154,7 +231,7 @@ def RSLOS_generator(n, d=1000, mode=0):
     return a
 
 
-def golmann_generator(n, d, mode=0):
+def golmann_generator(n, d, mode=1):
     tg = time()
     m = 2 ** 32
     a = [0] * n
@@ -162,11 +239,11 @@ def golmann_generator(n, d, mode=0):
         file = open("gollman.txt", 'a')
         print(' ', file=file)
     else:
-        file = open("gollman.txt", 'r')
-        strfile = file.read().replace("\n", " ")
-        a = list(map(int, strfile.split()))
-        file.close()
-        return a
+        with open("gollman.txt", 'r') as file:
+            strfile = file.read().replace("\n", " ")
+            a = list(map(int, strfile.split()))
+            file.close()
+            return a
     count_reg = 15
     reg = [0] * count_reg
     parametry = ((31, 7, 0),
@@ -224,14 +301,14 @@ def golmann_generator(n, d, mode=0):
 
 
 class mouse_generator():
-    def __init__(self, n, d, mode=0):
+    def __init__(self, n, d, mode=1):
         self.a = []
         if mode:
             self.file = open("mouse.txt", 'a')
             print(' ', file=self.file)
         else:
             self.file = open("mouse.txt", 'r')
-            self.a = list(map(lambda x: int(x) % d, self.file.read().replace("\n", "").split()))
+            self.a = list(map(lambda x: int(x) % d, self.file.read().replace("\n", " ").split()))
             self.file.close()
             return
         self.n = n
@@ -251,12 +328,13 @@ class mouse_generator():
         self.can = Canvas(ProgressBar, width=590, height=5, border=1, relief=SUNKEN)
         self.can.pack(side=TOP)
         lab.pack(side=TOP)
-        self.proc.set(str(int(len(self.a) / n * 100)) + ' %')
+        self.proc.set(str(int(len(self.a) / self.n * 100)) + ' %')
         self.lastXY = 0, 0
         self.mouseWin.bind("<Motion>", self.onMotion)
         self.mouseWin.focus_set()
         self.mouseWin.grab_set()
-        self.mouseWin.mainloop()
+        self.mouseWin.wait_window()
+        # self.mouseWin.mainloop()
 
     def onExit(self):
         self.file.close()
@@ -267,47 +345,51 @@ class mouse_generator():
         v = ((X - self.lastXY[0]) ** 2 + (Y - self.lastXY[1]) ** 2) ** 0.5
         if v - int(v) < 0.000001:
             return
-        self.drawcan.create_oval(X, Y, X + int(v), Y + int(v), width=0,
-        fill="#"+hex(randint(16, 255))[2:]+hex(randint(16, 255))[2:]+hex(randint(16, 255))[2:])
+        # self.drawcan.create_oval(X, Y, X + int(v), Y + int(v), width=0,
+        #                          fill="#" + hex(randint(16, 255))[2:] + hex(randint(16, 255))[2:] + hex(
+        #                              randint(16, 255))[2:])
         v = int(v * 10 ** 4) % 10 ** 6
         # if len(self.a) and self.a[-1]:
         #     v = self.a[-1] * v
         # print(v)
         self.a.append(v % (self.d + 1))
-        print(self.a[-1], file=self.file)
-        self.proc.set(str(int(len(self.a) / n * 100)) + ' %')
-        rec = self.can.create_rectangle(0, 0, int(len(self.a) / n * 590), 390, fill="blue")
+        print(self.a[-1], file=self.file, end=" ")
+        self.proc.set(str(int(len(self.a) / self.n * 100)) + ' %')
+        rec = self.can.create_rectangle(0, 0, int(len(self.a) / self.n * 590), 390, fill="blue")
         self.lastXY = X, Y
         if len(self.a) >= self.n:
             # print(*self.a)
             self.onExit()
 
 
-def real_generator(n, d):
+def real_generator(n, d, mode=1):
+    if mode:
+        return []
     file = open("output.txt", "r")
     bits = file.read().replace("\n", "")
+    bits = bits.replace(" ", "")
     a = []
     tmp = ""
     for si in bits:
         tmp += si
         if len(tmp) >= 16:
             a.append(int(tmp, 2) % (d + 1))
-            if len(a) >= n:
-                break
+            # if len(a) >= n:
+            #     break
             tmp = ""
     file.close()
     return a
 
 
 def random_analiz(a, d):
-    b = [0] * (d + 1)
-    for i in a:
-        # print(i)
-        b[i] += 1
-    av = sum(a) / len(a) / (d + 1)
-    D = sum([(a[i] / (d + 1) - av) ** 2 for i in range(len(a))]) / len(a)
+    # b = [0] * (d + 1)
+    # for i in a:
+    #     # print(i)
+    #     b[i] += 1
+    av = sum(a) / len(a) / (d)
+    D = sum([(a[i] / (d) - av) ** 2 for i in range(len(a))]) / len(a)
     G = D ** 0.5
-    v = len([i for i in a if 0.2113 < (i / (d + 1)) < 0.7887]) / len(a)
+    v = len([i for i in a if 0.2113 < (i / (d)) < 0.7887]) / len(a)
     print('матем. ожид.', av)
     print('дисперсия   ', D)
     print('станд. откл.', G)
@@ -315,31 +397,42 @@ def random_analiz(a, d):
     return av, D, G, v
 
 
-def shuffle_generator(n, d):
+def shuffle_generator(n, d, mode=1):
     tg = time()
+    if mode:
+        file = open("shuffle.txt", 'a')
+        print(' ', file=file)
+    else:
+        with open("shuffle.txt", 'r') as file:
+            strfile = file.read().replace("\n", " ")
+            a = list(map(int, strfile.split()))
+            file.close()
+            return a
     a = [0] * n
-    k = 0
-    for i in range(d + 1):
-        for j in range(n // (d + 1)):
-            a[k] = i
-            k += 1
-    shuffle(a)
+    R = int(time() * 10 ** 8 % 10 ** 8)
+    for i in range(n):
+        R0 = int(str(R)[-2:] + str(R)[:-2])
+        R1 = int(str(R)[2:] + str(R)[:2])
+        R = (R1 + R0) % 10 ** 8
+        a[i] = R % (d + 1)
     print('time: ', round(time() - tg, 3))
+    print(*a, file=file)
+    file.close()
     return a
 
 
-def quantum_generator(n, d, mode=0):
+def quantum_generator(n, d, mode=1):
     tg = time()
     a = []
     if mode:
         file = open("quantum.txt", 'a')
         print(' ', file=file)
     else:
-        file = open("quantum.txt", 'r')
-        strfile = file.read().replace("\n", " ")
-        a = list(map(int, strfile.split()))
-        file.close()
-        return a
+        with open("quantum.txt", 'r') as file:
+            strfile = file.read().replace("\n", " ")
+            a = list(map(int, strfile.split()))
+            file.close()
+            return a
     while len(a) < n:
         a += list(map(lambda x: x % (d + 1), get_data(data_type='uint16', array_length=1024)))
         print(*a[-1024:], file=file, end=" ")
@@ -349,43 +442,87 @@ def quantum_generator(n, d, mode=0):
     return a
 
 
-def ideal_generator(n, d):
+def ideal_generator(n, d, mode=1):
     a = []
+    if mode:
+        return []
     for i in range(1000):
         for j in range(1000):
-            a += [i, j]
+            a += [i] + [j]
     return a
 
 
-d = 999
-n = 10000
-generators = (rand_generator,  # 0
-              neyman_generator,  # 1
-              line_generator,  # 2
-              fib_generator,  # 3
-              RSLOS_generator,  # 4
-              golmann_generator,  # 5
-              mouse_generator,  # 6
-              real_generator,  # 7
-              shuffle_generator,  # 8
-              quantum_generator,  # 9
-              middle_generator,  # 10
-              ideal_generator)  # 11
-mouse = mouse_generator(n, d, 1)
-a = mouse.a
-# g = 9
-# a = generators[g](n, d)
-print(len(a))
-print('-' * 30)
-# print(len(a))
-# c = Counter(a)
-# print(c, sep="\n")
-random_analiz(a, d)
-print('-' * 30)
-for n, pib in analiz_pi(a, d, hit_or_miss):
-    print(n, round((pi - pib), 6), sep="\t")
+def fmouse_generator(n, d=1000, mode=1):
+    if mode:
+        file = open("mouse.txt", 'a')
+        print(' ', file=file)
+    else:
+        with open("mouse.txt", 'r') as file:
+            strfile = file.read().replace("\n", " ")
+            a = list(map(int, strfile.split()))
+            file.close()
+            return a
+    mouse = mouse_generator(n, d)
+    #mouse.mouseWin.wait_window()
+    return mouse.a
 
-print('-' * 30)
 
-for n, pib in analiz_pi(a, d, pi_buffon):
-    print(n, round((pi - pib), 6), sep="\t")
+generators = (rand_generator,
+              os_generator,
+              neyman_generator,
+              middle_generator,
+              knut_generator,
+              shuffle_generator,
+              line_generator,
+              fib_generator,
+              RSLOS_generator,
+              golmann_generator,
+              fmouse_generator,
+              quantum_generator,
+              real_generator,
+              ideal_generator)
+
+desriptios = ("Генератор случайных чисел randint из "
+              "стандартной библиотели Python random",
+              "urandom Python OS",
+              "Генератор фон Неймана",
+              "Срединных произведений",
+              "Генератор Кнута",
+              "Перемешивание",
+              "ЛКГ",
+              "Фибоначчи со сдвигом",
+              "РСЛОС",
+              "Каскад Голлмана",
+              "Движением мыши",
+              "Квантовый генератор",
+              "Тепловых шумов",
+              '"Идеальный" генератор'
+              )
+
+if __name__ == "__main__":
+    g = 10
+    d = 999
+    n = 1000
+    delta = 100
+    a = generators[g](n, d)
+    print(len(a))
+
+    print('-' * 30)
+    random_analiz(a, d)
+    print('-' * 30)
+
+    bhit = []
+    for pib in analiz_pi(a, d, delta, hit_or_miss):
+        bhit.append(pib)
+    pihit = sum(bhit) / len(bhit)
+    hitD = (sum([(x - pi) ** 2 for x in bhit]) / len(bhit)) ** 0.5
+    print(pihit, pi - pihit, hitD, sep='\n')
+    print('-' * 30)
+    bbuf = []
+    for pib in analiz_pi(a, d, delta, pi_buffon):
+        bbuf.append(pib)
+    pibuf = sum(bbuf) / len(bbuf)
+    bufD = (sum([(x - pi) ** 2 for x in bbuf]) / len(bbuf)) ** 0.5
+    print(pibuf, pi - pibuf, bufD, sep='\n')
+    print('-' * 30)
+    print(pi)
