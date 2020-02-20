@@ -50,8 +50,8 @@ class PI_Buffon:
             return
         self.GO.config(state=NORMAL)
         self.cur_algo.set(self.algo_list.curselection()[0])
-        # self.algo_descript.delete(1.0, END)
-        # self.algo_descript.insert(END, desriptios[self.cur_algo.get()])
+        self.algo_descript.delete(1.0, END)
+        self.algo_descript.insert(END, desriptios[self.cur_algo.get()])
 
     def tools_create(self, parrent=None):
         if not parrent:
